@@ -59,23 +59,24 @@ def handle_client(client_socket, client_address):
             if message.startswith(">pm"):
                 parts = message.split(maxsplit=2)
                 if len(parts) < 3:
-                    client_socket.send("System: Invalid PM format. Use: >pm <userIP> <message>\n".encode('utf-8'))
+                    client_socket.send("System: Use: >pm <username> <message>\n".encode('utf-8'))
                     continue
                 
-                target_ip = parts[1].strip()
+                target_username = parts[1].strip()
                 pm_message = parts[2].strip()
                 sent = False
                 
                 with clients_lock:
                     for c, info in clients.items():
-                        if info['ip'] == target_ip:
+                        if info['username'] == target_username:
                             c.send(f"[PM from {username}]: {pm_message}".encode('utf-8'))
                             sent = True
-                            
+                            break
+                
                 if not sent:
-                    client_socket.send(f"System: No user found with IP {target_ip}\n".encode('utf-8'))
+                    client_socket.send(f"System: No user found with username {target_username}\n".encode('utf-8'))
                 else:
-                    client_socket.send(f"[PM to {target_ip}]: {pm_message}".encode('utf-8'))
+                    client_socket.send(f"[PM to {target_username}]: {pm_message}".encode('utf-8'))
                 continue
 
             if message.strip() == ">show_ips":
